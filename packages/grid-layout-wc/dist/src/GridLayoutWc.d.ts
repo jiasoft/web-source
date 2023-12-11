@@ -40,12 +40,14 @@ type GridPosition = {
 };
 export declare class GridLayoutWc extends LitElement {
     RenderIndex: number;
-    static stylemap: CSSType;
     griddingWidth: number;
     gridMargin: number;
     edit: boolean;
     layoutData: GridItemData[];
     hideToolbar: boolean;
+    boxMenuPos: GridPosition;
+    boxMemuShow: boolean;
+    boxMenuGridData: GridItemData | null;
     oldLayoutData: string;
     styleMapEditing: boolean;
     dragData: {
@@ -74,7 +76,7 @@ export declare class GridLayoutWc extends LitElement {
     drawDragDataHtml(): import("lit-html").TemplateResult<1>;
     constructor();
     findGridItemData: (id: any) => GridItemData | undefined;
-    addGridItem(): void;
+    addGridItem(): GridItemData;
     /**
      * 获取空间的位置
      * @param w
@@ -124,6 +126,8 @@ export declare class GridLayoutWc extends LitElement {
     animateGridItem(item: GridItemData, w?: number, h?: number): Promise<unknown>;
     /** 移除GridItem */
     gridItemClose(event: PointerEvent): Promise<void>;
+    /** 移除GridItem */
+    gridItemCloseBySubMenu(): Promise<void>;
     getGridItemIndex(target: any): number;
     getGridItem(target: any): GridItemData;
     /**
@@ -164,6 +168,7 @@ export declare class GridLayoutWc extends LitElement {
     close: () => void;
     save: () => void;
     gridItemFloat: (event: PointerEvent) => void;
+    gridItemFloatBySubMenu: () => void;
     onGridLayoutClick(event: any): void;
     getGridItemTopY(dataList: GridItemData[], grid: ItemData, exceptIds: any[]): {
         x: number;
@@ -178,7 +183,9 @@ export declare class GridLayoutWc extends LitElement {
     setZindexUp(): void;
     setZindexDown(): void;
     openSetStyle(): void;
+    openSetStyleBySubMenu(): void;
     openConfigSet(): void;
+    openConfigSetBySubMenu(): void;
     get curActiveGridItem(): any;
     get curActiveGridItemStyle(): any;
     get curSelectGridItem(): GridItemData | undefined;
@@ -186,8 +193,9 @@ export declare class GridLayoutWc extends LitElement {
     get stageHeight(): number;
     connectedCallback(): void;
     render(): import("lit-html").TemplateResult<1>;
-    renderStyleSet(): import("lit-html").TemplateResult<1> | "";
-    renderToobar(): import("lit-html").TemplateResult<1> | "";
+    renderStyleSet(): "" | import("lit-html").TemplateResult<1>;
+    renderToobar(): "" | import("lit-html").TemplateResult<1>;
+    showItemMenu(): import("lit-html").TemplateResult<1>;
     static styles: import("lit").CSSResult;
 }
 export {};

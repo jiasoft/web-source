@@ -649,6 +649,10 @@
               "name": "openConfigSet"
             },
             {
+              "kind": "method",
+              "name": "showItemMenu"
+            },
+            {
               "kind": "field",
               "name": "curActiveGridItem"
             },

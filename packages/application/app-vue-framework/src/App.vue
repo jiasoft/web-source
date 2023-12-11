@@ -20,7 +20,8 @@ const closeEdit = () => {
 }
 const handleCommand = (command: string | number | object) => {
   if(command === 'add-panel'){
-    gridLayoutStore.addPanel();
+    const gridItem = gridLayoutStore.addPanel();
+    router.push({name:"panel-edit",query:{id:gridItem.id}})
   }
 }
 const save = () => {

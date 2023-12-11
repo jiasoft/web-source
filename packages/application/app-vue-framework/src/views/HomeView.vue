@@ -37,9 +37,9 @@ const onOpenConfigSet = (e:any) => {
 onMounted(() => {
   gridLayoutStore.setGridlayoutElement(gridLayoutEl.value);
   gridLayoutEl.value?.addEventListener('openConfigSet',(e:any)=> {
-    console.log(e);
-    const { slot,id } = e.detail;
-    router.push({ name: "panel-edit",query:{slot,id} });
+
+    const { id } = e.detail;
+    router.push({ name: "panel-edit",query:{id} });
   })
 })
 

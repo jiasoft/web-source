@@ -39,12 +39,16 @@ const DRAG_ID = 100000;
 
 export class GridLayoutWc extends LitElement {
   @state() RenderIndex: number = 0; //这个属性改动，页面才会render
-  static stylemap:CSSType = { borderWidth:'1', borderColor:'', borderStyle:'', backgroundColor:'' };
+  // static stylemap:CSSType = { borderWidth:'1', borderColor:'', borderStyle:'', backgroundColor:'' };
   @property({ type: Number }) griddingWidth = 10;
   @property({ type: Number }) gridMargin = 1;
   @property({ type: Boolean }) edit = false;
   @property({ type: Array }) layoutData: GridItemData[] = [];
   @property({ type: Boolean }) hideToolbar = false;
+  
+  boxMenuPos:GridPosition = {x:0,y:0};
+  boxMemuShow:boolean = false;
+  boxMenuGridData:GridItemData|null = null;
   oldLayoutData:string = "";
   styleMapEditing:boolean = false;
   dragData = { x: 0, y: 0, w: 60, h: 60, z: 0, id: DRAG_ID };
@@ -88,6 +92,7 @@ export class GridLayoutWc extends LitElement {
     this.layoutData.push(item);
     this.reRender();
     this.saveCurLayout();
+    return item;
   }
   /**
    * 获取空间的位置
@@ -383,11 +388,23 @@ export class GridLayoutWc extends LitElement {
 
     await this.animateGridItem(item,3,3);
     this.layoutData.splice(index,1);
-    // this.layoutData = [...this.layoutData]
     this.transition = false;
     this.rearrangement();
     this.reRender();
   }
+    /** 移除GridItem */
+    async gridItemCloseBySubMenu() {
+      if(!this.boxMenuGridData) return;
+      const item:GridItemData = this.boxMenuGridData;
+      const index = this.layoutData.findIndex((a)=>a.id === item.id);
+      await this.animateGridItem(item,3,3);
+      this.layoutData.splice(index,1);
+      this.transition = false;
+      this.boxMemuShow = false;
+      this.boxMenuGridData = null;
+      this.rearrangement();
+      this.reRender();
+    }
   getGridItemIndex(target: any) {
     const grid: HTMLElement | null = target?.closest('.grid-item') || null;
     return Number(grid?.dataset.index || '0');
@@ -413,7 +430,18 @@ export class GridLayoutWc extends LitElement {
       this.gridItemFloat(event);
       return;
     }
-
+    if (target?.closest('.btn-more')) {
+      const rect = target.getBoundingClientRect();
+      const parentRect = this.shadowRoot?.firstElementChild?.getBoundingClientRect() || {left:0,top:0,width:this.stageWidth,height:this.stageHeight};
+      this.boxMenuPos.x = rect.left - parentRect.left + rect.width / 2;
+      this.boxMenuPos.y = rect.top - parentRect.top + rect.height;
+      this.boxMemuShow = true;
+      this.boxMenuGridData = this.getGridItem(event.currentTarget);
+      this.reRender();
+      return;
+    }
+    this.boxMemuShow = false;
+    this.boxMenuGridData = null;
     event.preventDefault();
     const grid = this.getGridItem(event.currentTarget);
     if(this.curSelectGridItem && this.curSelectGridItem.id !== grid.id){
@@ -592,13 +620,37 @@ export class GridLayoutWc extends LitElement {
     }
     this.reRender();
   }
+  //浮动事件
+  gridItemFloatBySubMenu = () => {
+    const gridItem: GridItemData|null = this.boxMenuGridData;
+    if (gridItem) {
+      gridItem.float = !gridItem.float;
+      let z = 0;
+      this.layoutData.filter(item => item.float).forEach(item => { z = z < item.z ? item.z : z});
+      if(gridItem.float){
+        
+        gridItem.z = z + 1;
+      }else {
+        gridItem.z = 0;
+      }
+      this.boxMemuShow = false;
+      this.boxMenuGridData = null;
+      this.reRender();
+    }
+    
+  }
   //GridLayout的点击事件
   onGridLayoutClick(event: any) {
     if (event?.target?.closest(".toolbar")) return;
     if (event?.target?.closest(".grid-item")) return;
     if (event?.target?.closest("[slot]")) return;
+    if (event?.target?.closest(".btn-more")) return;
+    if (event?.target?.closest(".box-menu")) return;
+    
     this.layoutData.forEach((item) => { delete item.selected });
     this.styleMapEditing = false;
+    this.boxMemuShow = false;
+    this.boxMenuGridData = null;
     this.reRender();
   }
 
@@ -755,12 +807,36 @@ export class GridLayoutWc extends LitElement {
     this.styleMapEditing = !this.styleMapEditing;
     this.reRender();
   }
+  openSetStyleBySubMenu(){
+    if(!this.boxMenuGridData) return;
+    if(!this.boxMenuGridData.userStyle){
+      this.boxMenuGridData.userStyle = {
+        borderWidth:'1',
+        borderColor:"",
+        borderStyle:"",
+        backgroundColor:""
+      }
+    }
+    this.boxMemuShow = false;
+    this.boxMenuGridData = null;
+    this.styleMapEditing = !this.styleMapEditing;
+    this.reRender();
+  }
   openConfigSet() {
     if(!this.curSelectGridItem) return;
     const emit: any = new Event('openConfigSet');
     emit.detail = this.curSelectGridItem;
     this.dispatchEvent(emit);
   }
+  openConfigSetBySubMenu() {
+    if(!this.boxMenuGridData) return;
+    const emit: any = new Event('openConfigSet');
+    emit.detail = this.boxMenuGridData;
+    this.boxMemuShow = false;
+    this.boxMenuGridData = null;
+    this.dispatchEvent(emit);
+  }
+  
   //当前活动的GridItem
   get curActiveGridItem() {
     return this.curMovingGridItemData || this.curResizingGridItemData || null;
@@ -859,7 +935,6 @@ export class GridLayoutWc extends LitElement {
       <div class="style-box">
         ${this.renderStyleSet()}
         
-
         <i class="el-icon style-update-btn"  @click="${this.openSetStyle}" active="${this.styleMapEditing}">
           <!--[-->
             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-border-style" viewBox="0 0 16 16">
@@ -867,13 +942,14 @@ export class GridLayoutWc extends LitElement {
             </svg>
           <!--]-->
         </i>
-        <i class="el-icon" @click="${this.openConfigSet}">
-            <!--[-->
+        <!-- <i class="el-icon" @click="${this.openConfigSet}">
+            --[--
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" data-v-ea893728=""><path fill="currentColor" d="M600.704 64a32 32 0 0 1 30.464 22.208l35.2 109.376c14.784 7.232 28.928 15.36 42.432 24.512l112.384-24.192a32 32 0 0 1 34.432 15.36L944.32 364.8a32 32 0 0 1-4.032 37.504l-77.12 85.12a357.12 357.12 0 0 1 0 49.024l77.12 85.248a32 32 0 0 1 4.032 37.504l-88.704 153.6a32 32 0 0 1-34.432 15.296L708.8 803.904c-13.44 9.088-27.648 17.28-42.368 24.512l-35.264 109.376A32 32 0 0 1 600.704 960H423.296a32 32 0 0 1-30.464-22.208L357.696 828.48a351.616 351.616 0 0 1-42.56-24.64l-112.32 24.256a32 32 0 0 1-34.432-15.36L79.68 659.2a32 32 0 0 1 4.032-37.504l77.12-85.248a357.12 357.12 0 0 1 0-48.896l-77.12-85.248A32 32 0 0 1 79.68 364.8l88.704-153.6a32 32 0 0 1 34.432-15.296l112.32 24.256c13.568-9.152 27.776-17.408 42.56-24.64l35.2-109.312A32 32 0 0 1 423.232 64H600.64zm-23.424 64H446.72l-36.352 113.088-24.512 11.968a294.113 294.113 0 0 0-34.816 20.096l-22.656 15.36-116.224-25.088-65.28 113.152 79.68 88.192-1.92 27.136a293.12 293.12 0 0 0 0 40.192l1.92 27.136-79.808 88.192 65.344 113.152 116.224-25.024 22.656 15.296a294.113 294.113 0 0 0 34.816 20.096l24.512 11.968L446.72 896h130.688l36.48-113.152 24.448-11.904a288.282 288.282 0 0 0 34.752-20.096l22.592-15.296 116.288 25.024 65.28-113.152-79.744-88.192 1.92-27.136a293.12 293.12 0 0 0 0-40.256l-1.92-27.136 79.808-88.128-65.344-113.152-116.288 24.96-22.592-15.232a287.616 287.616 0 0 0-34.752-20.096l-24.448-11.904L577.344 128zM512 320a192 192 0 1 1 0 384 192 192 0 0 1 0-384m0 64a128 128 0 1 0 0 256 128 128 0 0 0 0-256"></path></svg>
-            <!--]-->
-        </i>
+            --]--
+        </i> -->
       </div>
     </div>
+    ${this.showItemMenu()}
     `: ''
     }
     
@@ -956,22 +1032,74 @@ export class GridLayoutWc extends LitElement {
   renderToobar(){
     if(!this.edit) return '';
     return html`<div class="tool-box">
-      
-    <i class="el-icon set-float">
+    <i class="el-icon btn-more" style="font-size: 20px;">
       <!--[-->
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024">
+        <path fill="currentColor" d="M176 416a112 112 0 1 0 0 224 112 112 0 0 0 0-224m0 64a48 48 0 1 1 0 96 48 48 0 0 1 0-96m336-64a112 112 0 1 1 0 224 112 112 0 0 1 0-224m0 64a48 48 0 1 0 0 96 48 48 0 0 0 0-96m336-64a112 112 0 1 1 0 224 112 112 0 0 1 0-224m0 64a48 48 0 1 0 0 96 48 48 0 0 0 0-96"></path>
+      </svg>
+      <!--]-->
+        
+    </i>
+
+    <!-- <i class="el-icon set-float" >
+      --[--
       <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-subtract" viewBox="0 0 16 16">
         <path d="M0 2a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v2h2a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-2H2a2 2 0 0 1-2-2V2zm2-1a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1H2z"/>
       </svg>
-      <!--]-->
+      --]--
     </i>
     <i class="el-icon close grid-item-close" style="font-size:20px;" >
-      <!--[-->
+      --[--
       <svg viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg"><path fill="currentColor" d="M764.288 214.592 512 466.88 259.712 214.592a31.936 31.936 0 0 0-45.12 45.12L466.752 512 214.528 764.224a31.936 31.936 0 1 0 45.12 45.184L512 557.184l252.288 252.288a31.936 31.936 0 0 0 45.12-45.12L557.12 512.064l252.288-252.352a31.936 31.936 0 1 0-45.12-45.184z"></path></svg>
-      <!--]-->
-    </i>
+      --]--
+    </i> -->
   </div>
   <div class="resize bottom-right" @mousedown="${this.gridItemResizeStart}" ></div>`
 
+  }
+  showItemMenu(){
+    return html`
+    <div class="box-menu ${this.boxMemuShow ? 'show':''}" style="left:${this.boxMenuPos.x}px;top:${this.boxMenuPos.y}px">
+        <div  class="menu-item" @click="${this.openSetStyleBySubMenu}">
+          <i class="el-icon">
+            <!--[-->
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-border-style" viewBox="0 0 16 16">
+              <path d="M1 3.5a.5.5 0 0 1 .5-.5h13a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-13a.5.5 0 0 1-.5-.5v-1zm0 4a.5.5 0 0 1 .5-.5h5a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-5a.5.5 0 0 1-.5-.5v-1zm0 4a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-1a.5.5 0 0 1-.5-.5v-1zm8 0a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-1a.5.5 0 0 1-.5-.5v-1zm-4 0a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-1a.5.5 0 0 1-.5-.5v-1zm8 0a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-1a.5.5 0 0 1-.5-.5v-1zm-4-4a.5.5 0 0 1 .5-.5h5a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-5a.5.5 0 0 1-.5-.5v-1z"></path>
+            </svg>
+            <!--]-->
+          </i>
+          <span class="el-label">Grid Style</span>
+        </div>
+        <div  class="menu-item" @click="${this.openConfigSetBySubMenu}">
+          <i class="el-icon">
+            <!--[-->
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" data-v-ea893728="">
+              <path fill="currentColor" d="M600.704 64a32 32 0 0 1 30.464 22.208l35.2 109.376c14.784 7.232 28.928 15.36 42.432 24.512l112.384-24.192a32 32 0 0 1 34.432 15.36L944.32 364.8a32 32 0 0 1-4.032 37.504l-77.12 85.12a357.12 357.12 0 0 1 0 49.024l77.12 85.248a32 32 0 0 1 4.032 37.504l-88.704 153.6a32 32 0 0 1-34.432 15.296L708.8 803.904c-13.44 9.088-27.648 17.28-42.368 24.512l-35.264 109.376A32 32 0 0 1 600.704 960H423.296a32 32 0 0 1-30.464-22.208L357.696 828.48a351.616 351.616 0 0 1-42.56-24.64l-112.32 24.256a32 32 0 0 1-34.432-15.36L79.68 659.2a32 32 0 0 1 4.032-37.504l77.12-85.248a357.12 357.12 0 0 1 0-48.896l-77.12-85.248A32 32 0 0 1 79.68 364.8l88.704-153.6a32 32 0 0 1 34.432-15.296l112.32 24.256c13.568-9.152 27.776-17.408 42.56-24.64l35.2-109.312A32 32 0 0 1 423.232 64H600.64zm-23.424 64H446.72l-36.352 113.088-24.512 11.968a294.113 294.113 0 0 0-34.816 20.096l-22.656 15.36-116.224-25.088-65.28 113.152 79.68 88.192-1.92 27.136a293.12 293.12 0 0 0 0 40.192l1.92 27.136-79.808 88.192 65.344 113.152 116.224-25.024 22.656 15.296a294.113 294.113 0 0 0 34.816 20.096l24.512 11.968L446.72 896h130.688l36.48-113.152 24.448-11.904a288.282 288.282 0 0 0 34.752-20.096l22.592-15.296 116.288 25.024 65.28-113.152-79.744-88.192 1.92-27.136a293.12 293.12 0 0 0 0-40.256l-1.92-27.136 79.808-88.128-65.344-113.152-116.288 24.96-22.592-15.232a287.616 287.616 0 0 0-34.752-20.096l-24.448-11.904L577.344 128zM512 320a192 192 0 1 1 0 384 192 192 0 0 1 0-384m0 64a128 128 0 1 0 0 256 128 128 0 0 0 0-256"></path>
+            </svg>
+            <!--]-->
+          </i>
+          <span class="el-label">Config Set</span>
+        </div>
+        <div  class="menu-item" @click="${this.gridItemFloatBySubMenu}">
+          <i class="el-icon">
+            <!--[-->
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-subtract" viewBox="0 0 16 16">
+              <path d="M0 2a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v2h2a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-2H2a2 2 0 0 1-2-2V2zm2-1a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1H2z"/>
+            </svg>
+            <!--]-->
+          </i>
+          <span class="el-label">Float Up</span>
+        </div>
+        <div  class="menu-item" @click="${this.gridItemCloseBySubMenu}">
+          <i class="el-icon close grid-item-close" style="font-size:20px;" >
+            <!--[-->
+            <svg viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg"><path fill="currentColor" d="M764.288 214.592 512 466.88 259.712 214.592a31.936 31.936 0 0 0-45.12 45.12L466.752 512 214.528 764.224a31.936 31.936 0 1 0 45.12 45.184L512 557.184l252.288 252.288a31.936 31.936 0 0 0 45.12-45.12L557.12 512.064l252.288-252.352a31.936 31.936 0 1 0-45.12-45.184z"></path></svg>
+            <!--]-->
+          </i>
+          <span class="el-label">Remove</span>
+        </div>
+      </div>
+    `
   }
   static styles = css`
   :host {
@@ -1188,6 +1316,49 @@ export class GridLayoutWc extends LitElement {
  .toolbar .el-icon.style-update-btn[active="true"]{
     background-color: #4097e4;
     color:#fff;
+ }
+ .btn-more{
+  position: relative;
+ }
+ .box-menu {
+  display:none;
+  min-width: 105px;
+  min-height: 32px;
+  position: absolute;
+  z-index:200001;
+  background-color:#fff;
+  box-shadow:0px 0px 8px -6px #000;
+  border:1px solid #e0e0e0;
+  font-style:normal;
+  font-size:12px;
+  color:#333;
+  transform: translateX(-50%);
+ }
+ .box-menu.show{
+  display:block;
+ }
+ .box-menu .menu-item {
+  display:flex;
+  padding:5px 10px;
+  align-items:center;
+  cursor:pointer;
+ }
+ .box-menu .menu-item .el-icon {
+  width:14px;
+  height:14px;
+  align-items:center;
+  display:flex;
+  color:#585656;
+ }
+ .box-menu .menu-item:hover {
+  background-color:#f1f1f1;
+  color:#7990be;
+ }
+ .box-menu .menu-item:hover .el-icon {
+  color:#7990be;
+ }
+ .box-menu .menu-item span {
+  margin-left:10px;
  }
 `;
 }

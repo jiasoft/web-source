@@ -11,8 +11,7 @@ export const useGridLayoutWcStore = defineStore('gridLayoutWcStore', () => {
     gridLayoutElement.value = ele;
   }
   const addPanel = () => {
-   
-    gridLayoutElement.value?.addGridItem();
+    return  gridLayoutElement.value?.addGridItem();
   }
   const saveLayoutDataList = () => {
     layoutDataList.value = gridLayoutElement.value.layoutData
