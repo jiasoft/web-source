@@ -8,6 +8,8 @@
     "@types/node": "^20.10.3",
     "lerna": "^7.4.2",
     "typescript": "^5.3.2"
+  },
+  "scripts":{
+    "install-all":"npm install --prefix .&& npm install --prefix packages/application/app-vue && npm install --prefix packages/application/app-vue-framework;"
   }
-  
 }
