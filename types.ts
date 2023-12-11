@@ -3,6 +3,7 @@ export interface ChartOptions {
     type?:ChartType
 }
 export interface ConfigType {
+    id?:string;
     PanelOptions?:any;
     ChartOptions?:ChartOptions;
 }

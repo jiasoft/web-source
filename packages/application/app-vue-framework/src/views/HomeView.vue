@@ -7,7 +7,7 @@ import { useRouter } from "vue-router";
 import { applyPolyfills as chartConfigApplyPolyfills, defineCustomElements as chartConfigDefineCustomElements } from 'chart-config/loader';
 import { applyPolyfills as chartAttrApplyPolyfills, defineCustomElements as chartAttrDefineCustomElements } from 'chart-attribute/loader';
 import { applyPolyfills as dsApplyPolyfills, defineCustomElements as dsDefineCustomElements } from 'data-source-edit/loader';
-
+import { useChartConfigStore} from '@/stores/chartConfigStore';
 chartConfigApplyPolyfills().then(() => {
   chartConfigDefineCustomElements();
 });
@@ -17,6 +17,8 @@ chartAttrApplyPolyfills().then(() => {
 dsApplyPolyfills().then(() => {
   dsDefineCustomElements();
 });
+
+const chartConfigStore = useChartConfigStore();
 const router = useRouter();
 const config = ref<string>(JSON.stringify({
   PanelOptions:{
@@ -63,7 +65,7 @@ onMounted(() => {
       <template v-for="item in gridLayoutStore.layoutDataList" :key="item.id">
         <!--eslint-disable-next-line vue/no-deprecated-slot-attribute -->
         <div class="vue-wc" :slot="item.slot">
-          <chart-config :config="config"/>
+          <chart-config :config="JSON.stringify(chartConfigStore.getChartConfig(item.id))"/>
         </div>
       </template>
     </grid-layout-wc>

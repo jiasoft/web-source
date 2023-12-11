@@ -5,6 +5,9 @@ import { applyPolyfills as chartAttrApplyPolyfills, defineCustomElements as char
 import { applyPolyfills as dsApplyPolyfills, defineCustomElements as dsDefineCustomElements } from 'data-source-edit/loader';
 import { Splitpanes, Pane } from 'splitpanes'
 import 'splitpanes/dist/splitpanes.css'
+
+import { useChartConfigStore} from '@/stores/chartConfigStore';
+import { useRoute } from "vue-router";
 chartConfigApplyPolyfills().then(() => {
   chartConfigDefineCustomElements();
 });
@@ -14,17 +17,15 @@ chartAttrApplyPolyfills().then(() => {
 dsApplyPolyfills().then(() => {
   dsDefineCustomElements();
 });
-
+const route = useRoute();
 const chartattribute = ref<any>(null);
-const config = ref<string>(JSON.stringify({
-  PanelOptions:{
-    title:"title",
-    description:"description",
-    transparentBackground:true
-  }
-}))
+const chartConfigStore = useChartConfigStore();
+const id:any = route.query.id;
+const cf =  chartConfigStore.getChartConfig(id);
+const config = ref<string>(JSON.stringify(cf));
 const onConfigChange = (e:any) => {
   config.value = JSON.stringify(e.detail);
+  chartConfigStore.setChartConfig(id,e.detail);
 }
 
 onMounted(()=> {
