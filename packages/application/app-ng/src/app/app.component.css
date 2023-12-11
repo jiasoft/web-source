@@ -1,0 +1,19 @@
+.content{
+    height: 100%;
+    display: flex;
+}
+.main-panel{
+    height: 100%;
+    flex:1;
+    border-right: 1px solid #dbdbdb;
+}
+chart-config{
+    height: 680px;
+    width: 100%;
+}
+chart-attribute{
+    width: 300px;
+}
+data-source-edit{
+    border-top: 1px solid #dbdbdb;
+}

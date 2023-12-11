@@ -1,0 +1,75 @@
+@import './base.css';
+header {
+  box-shadow: 0px 0px 15px -10px #000;
+  height: 40px;
+}
+#app {
+  margin: 0 auto;
+  font-weight: normal;
+  height: 100vh;
+}
+
+a,
+.green {
+  text-decoration: none;
+  color: hsla(160, 100%, 37%, 1);
+  transition: 0.4s;
+  padding: 3px;
+}
+.logo {
+  width:30px;
+  height: 30px;
+  margin-left:10px;
+  background-color: #fff;
+  border-radius: 50%;
+  padding: 5px;
+  box-shadow: 0px 0px 2px #000;
+}
+.dis-flex {
+  display: flex;
+  align-items: center;
+}
+.menu {
+  position: absolute;
+  left:0;
+  border-right:1px solid #dbdbdb;
+  top:40px;
+  bottom: 0px;
+  width:220px;
+  box-shadow: 0px 0px 15px -10px #000;
+  transition: all 0.3s;
+}
+.menu[open="false"]{
+  left:-220px;
+}
+.menu[open="true"]{
+  left:0;
+}
+.bread {
+  margin-left:10px;
+}
+.menu-btn{
+  width: 28px;
+  height: 28px;
+  text-align: center;
+  justify-content: center;
+  border-radius: 3px;
+
+}
+.menu-btn[menu="true"]{
+  background-color: rgb(173, 173, 173);
+}
+.menu-btn:hover {
+  cursor:pointer;
+  opacity: 0.8;
+}
+.tool {
+  flex:1;
+  justify-content:end
+}
+@media (hover: hover) {
+  a:hover {
+    background-color: hsla(160, 100%, 37%, 0.2);
+  }
+}
+

@@ -1,0 +1,7 @@
+<div class="content" role="main">
+  <div class="main-panel">
+    <chart-config [config]="config"/>
+    <data-source-edit />
+  </div>
+  <chart-attribute [config]="config" text="chart-attribute" (configChange)="onConfigChange($event)" />
+</div>

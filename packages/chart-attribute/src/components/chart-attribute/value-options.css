@@ -1,0 +1,81 @@
+:host {
+    display: block;
+}
+
+textarea {
+    height: 50px;
+}
+
+.box-middle {
+    display: flex;
+    align-items: center;
+}
+
+.panel-set {
+    background-color: #f5f5f5;
+    margin: 0px 0px;
+    border-radius: 3px;
+}
+
+.panel-set .title {
+    padding: 6px 5px;
+    border-bottom: 1px solid #dbdbdb;
+}
+
+.panel-set .css-exp-Icon {
+    cursor: pointer;
+    border-radius: 4px
+}
+
+.panel-set .css-exp-Icon:hover {
+    background-color: rgb(230 230 230);
+}
+
+.panel-set .css-content {
+    padding-left: 18px;
+}
+
+.panel-set .item {
+    margin: 5px 0px;
+}
+
+.panel-set .label {
+    font-family: 14px;
+    color: #999;
+}
+
+.panel-set .css-content {
+    padding-left: 18px;
+    padding-right: 18px;
+    display: none;
+}
+
+.panel-set.open .css-exp-Icon {
+    transform: rotate(90deg);
+}
+
+.panel-set.open .css-content {
+    display: block;
+}
+
+.des{font-size: 12px;color:rgb(135 135 135)}
+.tool-bar {
+    display: inline-flex;
+    margin:5px 0px;
+    padding:3px;
+    border:1px solid rgb(195 195 195);
+    border-radius: 3px;
+}
+.tool-bar button {
+    background-color: transparent;
+    border: none;
+    height: 25px;
+    border-radius: 3px;
+    cursor:pointer;
+}
+.tool-bar button:hover {
+    color: #7a7a7a;
+}
+.tool-bar button.selected{
+    background-color: rgb(205 205 205);
+}
