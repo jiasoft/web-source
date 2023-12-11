@@ -51,6 +51,7 @@ export class GridLayoutWc extends LitElement {
   boxMenuGridData:GridItemData|null = null;
   oldLayoutData:string = "";
   styleMapEditing:boolean = false;
+  showDialogGridStyle:boolean = false;
   dragData = { x: 0, y: 0, w: 60, h: 60, z: 0, id: DRAG_ID };
   draggIng: boolean = false;
   // stageHeight: number = 0;
@@ -819,7 +820,8 @@ export class GridLayoutWc extends LitElement {
     }
     this.boxMemuShow = false;
     this.boxMenuGridData = null;
-    this.styleMapEditing = !this.styleMapEditing;
+    // this.styleMapEditing = !this.styleMapEditing;
+    this.showDialogGridStyle = true;
     this.reRender();
   }
   openConfigSet() {
@@ -873,6 +875,10 @@ export class GridLayoutWc extends LitElement {
     })
     h = h + this.gridMargin;
     return h * this.griddingWidth;
+  }
+  dialogClose() {
+    this.showDialogGridStyle = false;
+    this.reRender();
   }
   connectedCallback() {
     super.connectedCallback();
@@ -970,6 +976,7 @@ export class GridLayoutWc extends LitElement {
     })}
     ${this.draggIng ? this.drawDragDataHtml() : ''}
   </div>
+  ${this.showDialog()}
     `;
   }
   renderStyleSet() {
@@ -1100,6 +1107,70 @@ export class GridLayoutWc extends LitElement {
         </div>
       </div>
     `
+  }
+  showDialog(){
+    if(!this.showDialogGridStyle) return '';
+    return html `<dialog class="dialog" open>
+    <div class="style-dialog">
+        <div class="head">Style</div>
+        <div class="item">
+          <span class="lab">border-width:</span>
+          <div class="ctr">
+            <input class="ctr-input" type="number" min="0" max="10"
+              value="${this.curSelectGridItemUserStyle?.borderWidth||0}"
+              @change="${(e:any)=>{this.changeInput('borderWidth',e)}}" />
+          </div>
+        </div>
+        <div class="item">
+          <span class="lab">border-style:</span>
+          <div class="ctr">
+            <select class="ctr-input" 
+              value="${this.curSelectGridItemUserStyle?.borderStyle||''}"
+              @change="${(e:any)=>{this.changeInput('borderStyle',e)}}">
+              <option value=""></option>
+              <option value="solid">solid</option>
+              <option value="dotted">dotted</option>
+              <option value="double">double</option>
+              <option value="dashed">dashed</option>
+              <option value="hidden">hidden</option>
+              <option value="inset">inset</option>
+              <option value="outset">outset</option>
+              <option value="ridge">ridge</option>    
+              <option value="none">none</option>
+            </select>
+          </div>
+        </div>
+        <div class="item">
+          <span class="lab">border-color:</span>
+          <div class="ctr">
+            <input class="ctr-input"  type="color"
+            value="${this.curSelectGridItemUserStyle?.borderColor||''}" 
+            @change="${(e:any)=>{this.changeInput('borderColor',e)}}" />
+          </div>
+        </div>
+        <div class="item">
+          <span class="lab">border-radius:</span>
+          <div class="ctr">
+            <input class="ctr-input"  type="number" min="0" max="10"
+            value="${this.curSelectGridItemUserStyle?.borderRadius||''}" 
+            @change="${(e:any)=>{this.changeInput('borderRadius',e)}}" />
+          </div>
+        </div>
+        <div class="item">
+          <span class="lab">background-color:</span>
+          <div class="ctr">
+            <input class="ctr-input" type="color" 
+              value="${this.curSelectGridItemUserStyle?.backgroundColor||''}" 
+              @change="${(e:any)=>{this.changeInput('backgroundColor',e)}}" />
+          </div>
+        </div>
+      </div>
+      <i class="el-icon close" @click="${this.dialogClose}">
+          <!--[-->
+          <svg viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg"><path fill="currentColor" d="M764.288 214.592 512 466.88 259.712 214.592a31.936 31.936 0 0 0-45.12 45.12L466.752 512 214.528 764.224a31.936 31.936 0 1 0 45.12 45.184L512 557.184l252.288 252.288a31.936 31.936 0 0 0 45.12-45.12L557.12 512.064l252.288-252.352a31.936 31.936 0 1 0-45.12-45.184z"></path></svg>
+          <!--]-->
+        </i>
+    </dialog>`
   }
   static styles = css`
   :host {
@@ -1359,6 +1430,34 @@ export class GridLayoutWc extends LitElement {
  }
  .box-menu .menu-item span {
   margin-left:10px;
+ }
+ .dialog {
+    width: 260px;
+    top: 50%;
+    transform: translateY(-50%);
+    border: 1px solid #e6e6e6;
+    box-shadow: 0px 0px 15px -6px;
+ }
+ .dialog .close{
+  width:18px;
+  height:18px;
+  position:absolute;
+  top:10px;
+  right:10px;
+  cursor:pointer;
+ }
+ .dialog .close:hover{
+  opacity:0.7;
+ }
+ .style-dialog {
+  font-size:12px;
+ }
+ .style-dialog {
+  font-size:12px;
+ }
+ .style-dialog .head {
+  padding-bottom:10px;
+  border-bottom:1px solid #c3c3c3;
  }
 `;
 }

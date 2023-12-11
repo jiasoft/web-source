@@ -50,6 +50,7 @@ export declare class GridLayoutWc extends LitElement {
     boxMenuGridData: GridItemData | null;
     oldLayoutData: string;
     styleMapEditing: boolean;
+    showDialogGridStyle: boolean;
     dragData: {
         x: number;
         y: number;
@@ -191,11 +192,13 @@ export declare class GridLayoutWc extends LitElement {
     get curSelectGridItem(): GridItemData | undefined;
     get curSelectGridItemUserStyle(): CSSType | undefined;
     get stageHeight(): number;
+    dialogClose(): void;
     connectedCallback(): void;
     render(): import("lit-html").TemplateResult<1>;
     renderStyleSet(): "" | import("lit-html").TemplateResult<1>;
     renderToobar(): "" | import("lit-html").TemplateResult<1>;
     showItemMenu(): import("lit-html").TemplateResult<1>;
+    showDialog(): "" | import("lit-html").TemplateResult<1>;
     static styles: import("lit").CSSResult;
 }
 export {};
