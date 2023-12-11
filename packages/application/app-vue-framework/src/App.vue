@@ -85,7 +85,7 @@ onMounted(()=>{
     <div class="wrapperdis-flex">
       <nav>
         <RouterLink to="/">Home</RouterLink>
-        <!-- <RouterLink to="/about">About</RouterLink> -->
+        <RouterLink to="/about">About</RouterLink>
       </nav>
     </div>
   </div>

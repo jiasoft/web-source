@@ -20,13 +20,6 @@ dsApplyPolyfills().then(() => {
 
 const chartConfigStore = useChartConfigStore();
 const router = useRouter();
-const config = ref<string>(JSON.stringify({
-  PanelOptions:{
-    title:"title",
-    description:"description",
-    transparentBackground:true
-  }
-}))
 
 const gridLayoutStore = useGridLayoutWcStore();
 
