@@ -46,9 +46,9 @@ export class GridLayoutWc extends LitElement {
   @property({ type: Array }) layoutData: GridItemData[] = [];
   @property({ type: Boolean }) hideToolbar = false;
   
-  boxMenuPos:GridPosition = {x:0,y:0};
-  boxMemuShow:boolean = false;
-  boxMenuGridData:GridItemData|null = null;
+  curGridItemSubMenuPos:GridPosition = {x:0,y:0};
+  curGridItemSubMenuShow:boolean = false;
+  curGridItemSubMenuGridData:GridItemData|null = null;
   oldLayoutData:string = "";
   styleMapEditing:boolean = false;
   showDialogGridStyle:boolean = false;
@@ -393,19 +393,22 @@ export class GridLayoutWc extends LitElement {
     this.rearrangement();
     this.reRender();
   }
-    /** 移除GridItem */
-    async gridItemCloseBySubMenu() {
-      if(!this.boxMenuGridData) return;
-      const item:GridItemData = this.boxMenuGridData;
-      const index = this.layoutData.findIndex((a)=>a.id === item.id);
-      await this.animateGridItem(item,3,3);
-      this.layoutData.splice(index,1);
-      this.transition = false;
-      this.boxMemuShow = false;
-      this.boxMenuGridData = null;
-      this.rearrangement();
-      this.reRender();
-    }
+  closeGridItemSubMenu(){
+    this.curGridItemSubMenuShow = false;
+    this.curGridItemSubMenuGridData = null;
+  }
+  /** 移除GridItem */
+  async gridItemCloseBySubMenu() {
+    if(!this.curGridItemSubMenuGridData) return;
+    const item:GridItemData = this.curGridItemSubMenuGridData;
+    const index = this.layoutData.findIndex((a)=>a.id === item.id);
+    await this.animateGridItem(item,3,3);
+    this.layoutData.splice(index,1);
+    this.transition = false;
+    this.closeGridItemSubMenu();
+    this.rearrangement();
+    this.reRender();
+  }
   getGridItemIndex(target: any) {
     const grid: HTMLElement | null = target?.closest('.grid-item') || null;
     return Number(grid?.dataset.index || '0');
@@ -434,15 +437,16 @@ export class GridLayoutWc extends LitElement {
     if (target?.closest('.btn-more')) {
       const rect = target.getBoundingClientRect();
       const parentRect = this.shadowRoot?.firstElementChild?.getBoundingClientRect() || {left:0,top:0,width:this.stageWidth,height:this.stageHeight};
-      this.boxMenuPos.x = rect.left - parentRect.left + rect.width / 2;
-      this.boxMenuPos.y = rect.top - parentRect.top + rect.height;
-      this.boxMemuShow = true;
-      this.boxMenuGridData = this.getGridItem(event.currentTarget);
+      this.curGridItemSubMenuPos.x = rect.left - parentRect.left + rect.width / 2;
+      this.curGridItemSubMenuPos.y = rect.top - parentRect.top + rect.height;
+      this.curGridItemSubMenuShow = true;
+      this.curGridItemSubMenuGridData = this.getGridItem(event.currentTarget);
+      this.layoutData.forEach((item) => {  delete item.selected });
+      this.curGridItemSubMenuGridData.selected = true;
       this.reRender();
       return;
     }
-    this.boxMemuShow = false;
-    this.boxMenuGridData = null;
+    this.closeGridItemSubMenu();
     event.preventDefault();
     const grid = this.getGridItem(event.currentTarget);
     if(this.curSelectGridItem && this.curSelectGridItem.id !== grid.id){
@@ -623,7 +627,7 @@ export class GridLayoutWc extends LitElement {
   }
   //浮动事件
   gridItemFloatBySubMenu = () => {
-    const gridItem: GridItemData|null = this.boxMenuGridData;
+    const gridItem: GridItemData|null = this.curGridItemSubMenuGridData;
     if (gridItem) {
       gridItem.float = !gridItem.float;
       let z = 0;
@@ -634,8 +638,8 @@ export class GridLayoutWc extends LitElement {
       }else {
         gridItem.z = 0;
       }
-      this.boxMemuShow = false;
-      this.boxMenuGridData = null;
+      
+      this.closeGridItemSubMenu();
       this.reRender();
     }
     
@@ -650,8 +654,7 @@ export class GridLayoutWc extends LitElement {
     
     this.layoutData.forEach((item) => { delete item.selected });
     this.styleMapEditing = false;
-    this.boxMemuShow = false;
-    this.boxMenuGridData = null;
+    this.closeGridItemSubMenu();
     this.reRender();
   }
 
@@ -680,9 +683,15 @@ export class GridLayoutWc extends LitElement {
     const overArea = overH * overW;
     return overArea;
   }
-  changeInput(attr: "borderStyle" | "borderColor" | "borderWidth" | "backgroundColor" | "borderRadius", e:any){
-    if(this.curSelectGridItemUserStyle){
-      this.curSelectGridItemUserStyle[attr] = e.currentTarget.value;
+  // changeInput(attr: "borderStyle" | "borderColor" | "borderWidth" | "backgroundColor" | "borderRadius", e:any){
+  //   if(this.curSelectGridItemUserStyle){
+  //     this.curSelectGridItemUserStyle[attr] = e.currentTarget.value;
+  //     this.reRender();
+  //   }
+  // }
+  dialogChangeInput(attr: "borderStyle" | "borderColor" | "borderWidth" | "backgroundColor" | "borderRadius", e:any){
+    if(this.curGridItemSubMenuGridDataUserStyle){
+      this.curGridItemSubMenuGridDataUserStyle[attr] = e.currentTarget.value;
       this.reRender();
     }
   }
@@ -809,33 +818,29 @@ export class GridLayoutWc extends LitElement {
     this.reRender();
   }
   openSetStyleBySubMenu(){
-    if(!this.boxMenuGridData) return;
-    if(!this.boxMenuGridData.userStyle){
-      this.boxMenuGridData.userStyle = {
+    if(!this.curGridItemSubMenuGridData) return;
+    if(!this.curGridItemSubMenuGridData.userStyle){
+      this.curGridItemSubMenuGridData.userStyle = {
         borderWidth:'1',
         borderColor:"",
         borderStyle:"",
         backgroundColor:""
       }
     }
-    this.boxMemuShow = false;
-    this.boxMenuGridData = null;
-    // this.styleMapEditing = !this.styleMapEditing;
     this.showDialogGridStyle = true;
     this.reRender();
   }
-  openConfigSet() {
-    if(!this.curSelectGridItem) return;
-    const emit: any = new Event('openConfigSet');
-    emit.detail = this.curSelectGridItem;
-    this.dispatchEvent(emit);
-  }
+  // openConfigSet() {
+  //   if(!this.curSelectGridItem) return;
+  //   const emit: any = new Event('openConfigSet');
+  //   emit.detail = this.curSelectGridItem;
+  //   this.dispatchEvent(emit);
+  // }
   openConfigSetBySubMenu() {
-    if(!this.boxMenuGridData) return;
+    if(!this.curGridItemSubMenuGridData) return;
     const emit: any = new Event('openConfigSet');
-    emit.detail = this.boxMenuGridData;
-    this.boxMemuShow = false;
-    this.boxMenuGridData = null;
+    emit.detail = this.curGridItemSubMenuGridData;
+    this.closeGridItemSubMenu();
     this.dispatchEvent(emit);
   }
   
@@ -851,10 +856,24 @@ export class GridLayoutWc extends LitElement {
     return this.layoutData.find(item => item.selected)
   }
   //选中的UserStyle;
-  get curSelectGridItemUserStyle(): CSSType | undefined {
-    if(!this.curSelectGridItem) return;
-    if(!this.curSelectGridItem.userStyle) {
-      this.curSelectGridItem.userStyle = {
+  // get curSelectGridItemUserStyle(): CSSType | undefined {
+  //   if(!this.curSelectGridItem) return;
+  //   if(!this.curSelectGridItem.userStyle) {
+  //     this.curSelectGridItem.userStyle = {
+  //       borderStyle: "",
+  //       borderWidth: "",
+  //       borderColor: "",
+  //       borderRadius: "",
+  //       backgroundColor: ""
+  //     }
+  //   }
+  //   return this.curSelectGridItem.userStyle;
+  // }
+  //选中的UserStyle;
+  get curGridItemSubMenuGridDataUserStyle(): CSSType | undefined {
+    if(!this.curGridItemSubMenuGridData) return;
+    if(!this.curGridItemSubMenuGridData.userStyle) {
+      this.curGridItemSubMenuGridData.userStyle = {
         borderStyle: "",
         borderWidth: "",
         borderColor: "",
@@ -862,7 +881,7 @@ export class GridLayoutWc extends LitElement {
         backgroundColor: ""
       }
     }
-    return this.curSelectGridItem.userStyle;
+    return this.curGridItemSubMenuGridData.userStyle;
   }
   get stageHeight(): number{
     let list = [...this.layoutData]
@@ -878,6 +897,7 @@ export class GridLayoutWc extends LitElement {
   }
   dialogClose() {
     this.showDialogGridStyle = false;
+    this.closeGridItemSubMenu();
     this.reRender();
   }
   connectedCallback() {
@@ -938,24 +958,24 @@ export class GridLayoutWc extends LitElement {
           <svg viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg"><path fill="currentColor" d="M544 805.888V168a32 32 0 1 0-64 0v637.888L246.656 557.952a30.72 30.72 0 0 0-45.312 0 35.52 35.52 0 0 0 0 48.064l288 306.048a30.72 30.72 0 0 0 45.312 0l288-306.048a35.52 35.52 0 0 0 0-48 30.72 30.72 0 0 0-45.312 0L544 805.824z"></path></svg>
         <!--]-->
       </i>
-      <div class="style-box">
-        ${this.renderStyleSet()}
+      <!-- <div class="style-box">
+        {this.renderStyleSet()}
         
         <i class="el-icon style-update-btn"  @click="${this.openSetStyle}" active="${this.styleMapEditing}">
-          <!--[-->
+          --[--
             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-border-style" viewBox="0 0 16 16">
               <path d="M1 3.5a.5.5 0 0 1 .5-.5h13a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-13a.5.5 0 0 1-.5-.5v-1zm0 4a.5.5 0 0 1 .5-.5h5a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-5a.5.5 0 0 1-.5-.5v-1zm0 4a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-1a.5.5 0 0 1-.5-.5v-1zm8 0a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-1a.5.5 0 0 1-.5-.5v-1zm-4 0a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-1a.5.5 0 0 1-.5-.5v-1zm8 0a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-1a.5.5 0 0 1-.5-.5v-1zm-4-4a.5.5 0 0 1 .5-.5h5a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-5a.5.5 0 0 1-.5-.5v-1z" />
             </svg>
-          <!--]-->
+          --]--
         </i>
-        <!-- <i class="el-icon" @click="${this.openConfigSet}">
+         <i class="el-icon" @click="{this.openConfigSet}">
             --[--
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" data-v-ea893728=""><path fill="currentColor" d="M600.704 64a32 32 0 0 1 30.464 22.208l35.2 109.376c14.784 7.232 28.928 15.36 42.432 24.512l112.384-24.192a32 32 0 0 1 34.432 15.36L944.32 364.8a32 32 0 0 1-4.032 37.504l-77.12 85.12a357.12 357.12 0 0 1 0 49.024l77.12 85.248a32 32 0 0 1 4.032 37.504l-88.704 153.6a32 32 0 0 1-34.432 15.296L708.8 803.904c-13.44 9.088-27.648 17.28-42.368 24.512l-35.264 109.376A32 32 0 0 1 600.704 960H423.296a32 32 0 0 1-30.464-22.208L357.696 828.48a351.616 351.616 0 0 1-42.56-24.64l-112.32 24.256a32 32 0 0 1-34.432-15.36L79.68 659.2a32 32 0 0 1 4.032-37.504l77.12-85.248a357.12 357.12 0 0 1 0-48.896l-77.12-85.248A32 32 0 0 1 79.68 364.8l88.704-153.6a32 32 0 0 1 34.432-15.296l112.32 24.256c13.568-9.152 27.776-17.408 42.56-24.64l35.2-109.312A32 32 0 0 1 423.232 64H600.64zm-23.424 64H446.72l-36.352 113.088-24.512 11.968a294.113 294.113 0 0 0-34.816 20.096l-22.656 15.36-116.224-25.088-65.28 113.152 79.68 88.192-1.92 27.136a293.12 293.12 0 0 0 0 40.192l1.92 27.136-79.808 88.192 65.344 113.152 116.224-25.024 22.656 15.296a294.113 294.113 0 0 0 34.816 20.096l24.512 11.968L446.72 896h130.688l36.48-113.152 24.448-11.904a288.282 288.282 0 0 0 34.752-20.096l22.592-15.296 116.288 25.024 65.28-113.152-79.744-88.192 1.92-27.136a293.12 293.12 0 0 0 0-40.256l-1.92-27.136 79.808-88.128-65.344-113.152-116.288 24.96-22.592-15.232a287.616 287.616 0 0 0-34.752-20.096l-24.448-11.904L577.344 128zM512 320a192 192 0 1 1 0 384 192 192 0 0 1 0-384m0 64a128 128 0 1 0 0 256 128 128 0 0 0 0-256"></path></svg>
             --]--
-        </i> -->
-      </div>
+        </i> 
+      </div> -->
     </div>
-    ${this.showItemMenu()}
+    ${this.showGridItemMenu()}
     `: ''
     }
     
@@ -979,63 +999,63 @@ export class GridLayoutWc extends LitElement {
   ${this.showDialog()}
     `;
   }
-  renderStyleSet() {
-    return this.styleMapEditing ? html`
-    <div class="style-set">
-      <div class="head">Style</div>
-      <div class="item">
-        <span class="lab">border-width:</span>
-        <div class="ctr">
-          <input class="ctr-input" type="number" min="0" max="10"
-            value="${this.curSelectGridItemUserStyle?.borderWidth||0}"
-            @change="${(e:any)=>{this.changeInput('borderWidth',e)}}" />
-        </div>
-      </div>
-      <div class="item">
-        <span class="lab">border-style:</span>
-        <div class="ctr">
-          <select class="ctr-input" 
-            value="${this.curSelectGridItemUserStyle?.borderStyle||''}"
-            @change="${(e:any)=>{this.changeInput('borderStyle',e)}}">
-            <option value=""></option>
-            <option value="solid">solid</option>
-            <option value="dotted">dotted</option>
-            <option value="double">double</option>
-            <option value="dashed">dashed</option>
-            <option value="hidden">hidden</option>
-            <option value="inset">inset</option>
-            <option value="outset">outset</option>
-            <option value="ridge">ridge</option>    
-            <option value="none">none</option>
-          </select>
-        </div>
-      </div>
-      <div class="item">
-        <span class="lab">border-color:</span>
-        <div class="ctr">
-          <input class="ctr-input"  type="color"
-          value="${this.curSelectGridItemUserStyle?.borderColor||''}" 
-          @change="${(e:any)=>{this.changeInput('borderColor',e)}}" />
-        </div>
-      </div>
-      <div class="item">
-        <span class="lab">border-radius:</span>
-        <div class="ctr">
-          <input class="ctr-input"  type="number" min="0" max="10"
-          value="${this.curSelectGridItemUserStyle?.borderRadius||''}" 
-          @change="${(e:any)=>{this.changeInput('borderRadius',e)}}" />
-        </div>
-      </div>
-      <div class="item">
-        <span class="lab">background-color:</span>
-        <div class="ctr">
-          <input class="ctr-input" type="color" 
-            value="${this.curSelectGridItemUserStyle?.backgroundColor||''}" 
-            @change="${(e:any)=>{this.changeInput('backgroundColor',e)}}" />
-        </div>
-      </div>
-    </div>`:``;
-  }
+  // renderStyleSet() {
+  //   return this.styleMapEditing ? html`
+  //   <div class="style-set">
+  //     <div class="head">Style</div>
+  //     <div class="item">
+  //       <span class="lab">border-width:</span>
+  //       <div class="ctr">
+  //         <input class="ctr-input" type="number" min="0" max="10"
+  //           value="${this.curSelectGridItemUserStyle?.borderWidth||0}"
+  //           @change="${(e:any)=>{this.changeInput('borderWidth',e)}}" />
+  //       </div>
+  //     </div>
+  //     <div class="item">
+  //       <span class="lab">border-style:</span>
+  //       <div class="ctr">
+  //         <select class="ctr-input" 
+  //           value="${this.curSelectGridItemUserStyle?.borderStyle||''}"
+  //           @change="${(e:any)=>{this.changeInput('borderStyle',e)}}">
+  //           <option value=""></option>
+  //           <option value="solid">solid</option>
+  //           <option value="dotted">dotted</option>
+  //           <option value="double">double</option>
+  //           <option value="dashed">dashed</option>
+  //           <option value="hidden">hidden</option>
+  //           <option value="inset">inset</option>
+  //           <option value="outset">outset</option>
+  //           <option value="ridge">ridge</option>    
+  //           <option value="none">none</option>
+  //         </select>
+  //       </div>
+  //     </div>
+  //     <div class="item">
+  //       <span class="lab">border-color:</span>
+  //       <div class="ctr">
+  //         <input class="ctr-input"  type="color"
+  //         value="${this.curSelectGridItemUserStyle?.borderColor||''}" 
+  //         @change="${(e:any)=>{this.changeInput('borderColor',e)}}" />
+  //       </div>
+  //     </div>
+  //     <div class="item">
+  //       <span class="lab">border-radius:</span>
+  //       <div class="ctr">
+  //         <input class="ctr-input"  type="number" min="0" max="10"
+  //         value="${this.curSelectGridItemUserStyle?.borderRadius||''}" 
+  //         @change="${(e:any)=>{this.changeInput('borderRadius',e)}}" />
+  //       </div>
+  //     </div>
+  //     <div class="item">
+  //       <span class="lab">background-color:</span>
+  //       <div class="ctr">
+  //         <input class="ctr-input" type="color" 
+  //           value="${this.curSelectGridItemUserStyle?.backgroundColor||''}" 
+  //           @change="${(e:any)=>{this.changeInput('backgroundColor',e)}}" />
+  //       </div>
+  //     </div>
+  //   </div>`:``;
+  // }
   renderToobar(){
     if(!this.edit) return '';
     return html`<div class="tool-box">
@@ -1064,9 +1084,9 @@ export class GridLayoutWc extends LitElement {
   <div class="resize bottom-right" @mousedown="${this.gridItemResizeStart}" ></div>`
 
   }
-  showItemMenu(){
+  showGridItemMenu(){
     return html`
-    <div class="box-menu ${this.boxMemuShow ? 'show':''}" style="left:${this.boxMenuPos.x}px;top:${this.boxMenuPos.y}px">
+    <div class="box-menu ${this.curGridItemSubMenuShow ? 'show':''}" style="left:${this.curGridItemSubMenuPos.x}px;top:${this.curGridItemSubMenuPos.y}px">
         <div  class="menu-item" @click="${this.openSetStyleBySubMenu}">
           <i class="el-icon">
             <!--[-->
@@ -1110,23 +1130,23 @@ export class GridLayoutWc extends LitElement {
   }
   showDialog(){
     if(!this.showDialogGridStyle) return '';
-    return html `<dialog class="dialog" open>
+    return html `<div class="dialog" open>
     <div class="style-dialog">
         <div class="head">Style</div>
         <div class="item">
           <span class="lab">border-width:</span>
           <div class="ctr">
             <input class="ctr-input" type="number" min="0" max="10"
-              value="${this.curSelectGridItemUserStyle?.borderWidth||0}"
-              @change="${(e:any)=>{this.changeInput('borderWidth',e)}}" />
+              value="${this.curGridItemSubMenuGridDataUserStyle?.borderWidth||0}"
+              @change="${(e:any)=>{this.dialogChangeInput('borderWidth',e)}}" />
           </div>
         </div>
         <div class="item">
           <span class="lab">border-style:</span>
           <div class="ctr">
             <select class="ctr-input" 
-              value="${this.curSelectGridItemUserStyle?.borderStyle||''}"
-              @change="${(e:any)=>{this.changeInput('borderStyle',e)}}">
+              value="${this.curGridItemSubMenuGridDataUserStyle?.borderStyle||''}"
+              @change="${(e:any)=>{this.dialogChangeInput('borderStyle',e)}}">
               <option value=""></option>
               <option value="solid">solid</option>
               <option value="dotted">dotted</option>
@@ -1144,33 +1164,34 @@ export class GridLayoutWc extends LitElement {
           <span class="lab">border-color:</span>
           <div class="ctr">
             <input class="ctr-input"  type="color"
-            value="${this.curSelectGridItemUserStyle?.borderColor||''}" 
-            @change="${(e:any)=>{this.changeInput('borderColor',e)}}" />
+            value="${this.curGridItemSubMenuGridDataUserStyle?.borderColor||''}" 
+            @change="${(e:any)=>{this.dialogChangeInput('borderColor',e)}}" />
           </div>
         </div>
         <div class="item">
           <span class="lab">border-radius:</span>
           <div class="ctr">
             <input class="ctr-input"  type="number" min="0" max="10"
-            value="${this.curSelectGridItemUserStyle?.borderRadius||''}" 
-            @change="${(e:any)=>{this.changeInput('borderRadius',e)}}" />
+            value="${this.curGridItemSubMenuGridDataUserStyle?.borderRadius||''}" 
+            @change="${(e:any)=>{this.dialogChangeInput('borderRadius',e)}}" />
           </div>
         </div>
         <div class="item">
           <span class="lab">background-color:</span>
           <div class="ctr">
             <input class="ctr-input" type="color" 
-              value="${this.curSelectGridItemUserStyle?.backgroundColor||''}" 
-              @change="${(e:any)=>{this.changeInput('backgroundColor',e)}}" />
+              value="${this.curGridItemSubMenuGridDataUserStyle?.backgroundColor||''}" 
+              @change="${(e:any)=>{this.dialogChangeInput('backgroundColor',e)}}" />
           </div>
         </div>
-      </div>
-      <i class="el-icon close" @click="${this.dialogClose}">
+        <i class="el-icon close" @click="${this.dialogClose}">
           <!--[-->
           <svg viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg"><path fill="currentColor" d="M764.288 214.592 512 466.88 259.712 214.592a31.936 31.936 0 0 0-45.12 45.12L466.752 512 214.528 764.224a31.936 31.936 0 1 0 45.12 45.184L512 557.184l252.288 252.288a31.936 31.936 0 0 0 45.12-45.12L557.12 512.064l252.288-252.352a31.936 31.936 0 1 0-45.12-45.184z"></path></svg>
           <!--]-->
         </i>
-    </dialog>`
+      </div>
+      
+    </div>`
   }
   static styles = css`
   :host {
@@ -1337,11 +1358,11 @@ export class GridLayoutWc extends LitElement {
  .resize {
    position: absolute;
  }
- .style-box {
+ /* .style-box {
   position:relative;
   display:flex;
   flex-flow:column;
- }
+ } 
  .style-set {
   border:1px solid #9a9a9a;
   padding:10px;
@@ -1376,19 +1397,19 @@ export class GridLayoutWc extends LitElement {
   color:#fff;
   border:1px solid #424242;
  }
- .style-set .ctr-input option{
+ .style-set .ctr-input option {
   height:28px;
   margin:5px;
- }
- .toolbar .el-icon.style-update-btn:hover{
+ } */
+ .toolbar .el-icon.style-update-btn:hover {
   background-color:#fff;
   color:#333;
  }
- .toolbar .el-icon.style-update-btn[active="true"]{
+ .toolbar .el-icon.style-update-btn[active="true"] {
     background-color: #4097e4;
     color:#fff;
  }
- .btn-more{
+ .btn-more {
   position: relative;
  }
  .box-menu {
@@ -1432,32 +1453,47 @@ export class GridLayoutWc extends LitElement {
   margin-left:10px;
  }
  .dialog {
+  position:absolute;
+  z-index:999999;
+  left:0;
+  top:0;
+  right:0;
+  bottom:0;
+  background:rgba(0,0,0,0.3);
+ }
+ 
+ .style-dialog {
+    font-size:12px;
+    position:absolute;
     width: 260px;
     top: 50%;
-    transform: translateY(-50%);
+    
+    left:50%;
+    transform: translate(-50%,-50%);
     border: 1px solid #e6e6e6;
     box-shadow: 0px 0px 15px -6px;
+    background: white;
+    padding:42px 20px 20px;
+    border-radius: 5px;
  }
- .dialog .close{
-  width:18px;
-  height:18px;
-  position:absolute;
-  top:10px;
-  right:10px;
-  cursor:pointer;
+ .dialog .close {
+    width:18px;
+    height:18px;
+    position:absolute;
+    top:10px;
+    right:10px;
+    cursor:pointer;
  }
- .dialog .close:hover{
-  opacity:0.7;
- }
- .style-dialog {
-  font-size:12px;
- }
- .style-dialog {
-  font-size:12px;
+ .dialog .close:hover {
+    opacity:0.7;
  }
  .style-dialog .head {
-  padding-bottom:10px;
-  border-bottom:1px solid #c3c3c3;
+    position:absolute;
+    top:0;
+    left:0;
+    right:0;
+    padding:8px;
+    border-bottom:1px solid #dddddd;
  }
 `;
 }

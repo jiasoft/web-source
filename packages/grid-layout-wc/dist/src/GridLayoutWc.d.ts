@@ -45,9 +45,9 @@ export declare class GridLayoutWc extends LitElement {
     edit: boolean;
     layoutData: GridItemData[];
     hideToolbar: boolean;
-    boxMenuPos: GridPosition;
-    boxMemuShow: boolean;
-    boxMenuGridData: GridItemData | null;
+    curGridItemSubMenuPos: GridPosition;
+    curGridItemSubMenuShow: boolean;
+    curGridItemSubMenuGridData: GridItemData | null;
     oldLayoutData: string;
     styleMapEditing: boolean;
     showDialogGridStyle: boolean;
@@ -127,6 +127,7 @@ export declare class GridLayoutWc extends LitElement {
     animateGridItem(item: GridItemData, w?: number, h?: number): Promise<unknown>;
     /** 移除GridItem */
     gridItemClose(event: PointerEvent): Promise<void>;
+    closeGridItemSubMenu(): void;
     /** 移除GridItem */
     gridItemCloseBySubMenu(): Promise<void>;
     getGridItemIndex(target: any): number;
@@ -176,7 +177,7 @@ export declare class GridLayoutWc extends LitElement {
         y: number;
     };
     calcOverArea(data1: ItemData, data2: ItemData): number;
-    changeInput(attr: "borderStyle" | "borderColor" | "borderWidth" | "backgroundColor" | "borderRadius", e: any): void;
+    dialogChangeInput(attr: "borderStyle" | "borderColor" | "borderWidth" | "backgroundColor" | "borderRadius", e: any): void;
     sortTopSpace(list: GridItemData[]): void;
     sortBottomOver(list: GridItemData[]): void;
     pressDownOver(list: GridItemData[], item: GridItemData): void;
@@ -185,19 +186,17 @@ export declare class GridLayoutWc extends LitElement {
     setZindexDown(): void;
     openSetStyle(): void;
     openSetStyleBySubMenu(): void;
-    openConfigSet(): void;
     openConfigSetBySubMenu(): void;
     get curActiveGridItem(): any;
     get curActiveGridItemStyle(): any;
     get curSelectGridItem(): GridItemData | undefined;
-    get curSelectGridItemUserStyle(): CSSType | undefined;
+    get curGridItemSubMenuGridDataUserStyle(): CSSType | undefined;
     get stageHeight(): number;
     dialogClose(): void;
     connectedCallback(): void;
     render(): import("lit-html").TemplateResult<1>;
-    renderStyleSet(): "" | import("lit-html").TemplateResult<1>;
     renderToobar(): "" | import("lit-html").TemplateResult<1>;
-    showItemMenu(): import("lit-html").TemplateResult<1>;
+    showGridItemMenu(): import("lit-html").TemplateResult<1>;
     showDialog(): "" | import("lit-html").TemplateResult<1>;
     static styles: import("lit").CSSResult;
 }
