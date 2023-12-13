@@ -92,6 +92,8 @@ export class ChartConfig {
           </tbody>
         </table>
       </div>
+    } else if ( this.configOBJ.ChartOptions.type === 'text_panel'){
+      return <div></div>
     }
     return <div class="chart"  ref={(el) => this.chartElement = el as HTMLDivElement}></div>
   }

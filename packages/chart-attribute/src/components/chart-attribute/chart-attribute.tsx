@@ -7,6 +7,7 @@ import icon_gauge from "../../icon/icon_gauge.svg";
 import icon_piechart from "../../icon/icon_piechart.svg";
 import icn_table_panel from "../../icon/icn-table-panel.svg";
 import icn_timeseries_panel from "../../icon/icn-timeseries-panel.svg";
+import icn_text_panel from "../../icon/icn-text-panel.svg";
 import { ConfigType, ChartType } from "../../../../../types"
 
 
@@ -55,6 +56,12 @@ export class ChartAttribute {
       id:"table_panel",
       icon: icn_table_panel,
       header: "Table",
+      content: "Supports many column styles"
+    },
+    {
+      id:"text_panel",
+      icon: icn_text_panel,
+      header: "Text Panel",
       content: "Supports many column styles"
     }
   ]
