@@ -1129,12 +1129,12 @@ export class GridLayoutWc extends LitElement {
               <option value=""></option>
               <option value="solid">solid</option>
               <option value="dotted">dotted</option>
-              <option value="double" >double</option>
+              <option value="double">double</option>
               <option value="dashed">dashed</option>
-              <option value="hidden" >hidden</option>
-              <option value="inset" >inset</option>
-              <option value="outset" >outset</option>
-              <option value="ridge" >ridge</option>    
+              <option value="hidden">hidden</option>
+              <option value="inset">inset</option>
+              <option value="outset">outset</option>
+              <option value="ridge">ridge</option>    
               <option value="none">none</option>
             </select>
           </div>
