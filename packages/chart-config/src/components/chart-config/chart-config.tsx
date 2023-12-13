@@ -38,28 +38,28 @@ export class ChartConfig {
   }
   setEchart(){
     
-    if(this.configOBJ.ChartOptions.type === 'table_panel'){
-      return;
+    if(['timeseries_panel','bar_chart','gauge','pie_chart'].includes(this.configOBJ.ChartOptions.type)){
+    
+      const option = {
+        xAxis: {
+          type: 'category',
+          data: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
+        },
+        yAxis: {
+          type: 'value'
+        },
+        series: [
+          {
+            data: [820, 932, 901, 934, 1290, 1330, 1320],
+            type: CT[this.configOBJ.ChartOptions?.type] || 'line',
+            smooth: true
+          }
+        ]
+      };
+      if(!this.chartElement) return;
+      this.chart = echarts.init(this.chartElement);
+      this.chart.setOption(option);
     }
-    const option = {
-      xAxis: {
-        type: 'category',
-        data: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
-      },
-      yAxis: {
-        type: 'value'
-      },
-      series: [
-        {
-          data: [820, 932, 901, 934, 1290, 1330, 1320],
-          type: CT[this.configOBJ.ChartOptions?.type] || 'line',
-          smooth: true
-        }
-      ]
-    };
-    if(!this.chartElement) return;
-    this.chart = echarts.init(this.chartElement);
-    this.chart.setOption(option);
   }
   connectedCallback(){
     this.configOBJ = JSON.parse(this.config||'{}')
@@ -71,7 +71,9 @@ export class ChartConfig {
     this.setEchart();
   }
   getBar(){
-    if(this.configOBJ.ChartOptions.type === 'table_panel'){
+    if ( this.configOBJ.ChartOptions.type === 'text_panel'){
+      return <div></div>
+    } else if(this.configOBJ.ChartOptions.type === 'table_panel'){
       return <div>
         <table class="tbl-data">
           <thead>
@@ -92,9 +94,7 @@ export class ChartConfig {
           </tbody>
         </table>
       </div>
-    } else if ( this.configOBJ.ChartOptions.type === 'text_panel'){
-      return <div></div>
-    }
+    } 
     return <div class="chart"  ref={(el) => this.chartElement = el as HTMLDivElement}></div>
   }
   render() {

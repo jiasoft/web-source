@@ -24,9 +24,15 @@ interface ChartItemType {
 })
 export class ChartAttribute {
   @Prop() config: string;
-  @Prop() selectId: ChartType = "timeseries_panel";
+  @Prop() selectId: ChartType = "text_panel";
   @State() configObj: ConfigType = {};
   @State() chartTypeData: ChartItemType[] = [
+    {
+      id:"text_panel",
+      icon: icn_text_panel,
+      header: "Text Panel",
+      content: "Supports many column styles"
+    },
     {
       id:"timeseries_panel",
       icon: icn_timeseries_panel,
@@ -57,13 +63,8 @@ export class ChartAttribute {
       icon: icn_table_panel,
       header: "Table",
       content: "Supports many column styles"
-    },
-    {
-      id:"text_panel",
-      icon: icn_text_panel,
-      header: "Text Panel",
-      content: "Supports many column styles"
     }
+    
   ]
   @State() showSearchText: boolean = false;
   @Event({
@@ -111,7 +112,9 @@ export class ChartAttribute {
     }
     if(!this.configObj.ChartOptions){
       this.configObj.ChartOptions = {};
+      
     }
+    this.selectId = this.configObj.ChartOptions.type || 'text_panel'
   }
   componentDidLoad(){
     
