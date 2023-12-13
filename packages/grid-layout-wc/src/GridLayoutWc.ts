@@ -358,8 +358,10 @@ export class GridLayoutWc extends LitElement {
   }
   animateGridItem(item:GridItemData,w:number=3,h:number=2) {
     return new Promise(resolve => {
-      const minusW = (item.w - w) / 5;
-      const minusH = (item.h - h) / 5;
+      let minusW = Math.floor((item.w - w) / 5);
+      let minusH = Math.floor((item.h - h) / 5);
+      if(minusW < 1) minusW = 1;
+      if(minusH < 1) minusH = 1;
       const animate = ()=> {
         item.w -= minusW;
         item.h -= minusH;
@@ -1149,15 +1151,15 @@ export class GridLayoutWc extends LitElement {
               value="${this.curGridItemSubMenuGridDataUserStyle?.borderStyle||''}"
               @change="${(e:any)=>{this.dialogChangeInput('borderStyle',e)}}">
               <option value=""></option>
-              <option value="solid" ${this.curGridItemSubMenuGridDataUserStyle?.borderStyle ==='solid'?'selected':''}>solid</option>
-              <option value="dotted" ${this.curGridItemSubMenuGridDataUserStyle?.borderStyle ==='dotted'?'selected':''}>dotted</option>
-              <option value="double" ${this.curGridItemSubMenuGridDataUserStyle?.borderStyle ==='double'?'selected':''}>double</option>
-              <option value="dashed" ${this.curGridItemSubMenuGridDataUserStyle?.borderStyle ==='dashed'?'selected':''}>dashed</option>
-              <option value="hidden" ${this.curGridItemSubMenuGridDataUserStyle?.borderStyle ==='hidden'?'selected':''}>hidden</option>
-              <option value="inset" ${this.curGridItemSubMenuGridDataUserStyle?.borderStyle ==='inset'?'selected':''}>inset</option>
-              <option value="outset" ${this.curGridItemSubMenuGridDataUserStyle?.borderStyle ==='outset'?'selected':''}>outset</option>
-              <option value="ridge" ${this.curGridItemSubMenuGridDataUserStyle?.borderStyle ==='ridge'?'selected':''}>ridge</option>    
-              <option value="none" ${this.curGridItemSubMenuGridDataUserStyle?.borderStyle ==='none'?'selected':''}>none</option>
+              <option value="solid">solid</option>
+              <option value="dotted">dotted</option>
+              <option value="double">double</option>
+              <option value="dashed">dashed</option>
+              <option value="hidden">hidden</option>
+              <option value="inset">inset</option>
+              <option value="outset">outset</option>
+              <option value="ridge">ridge</option>    
+              <option value="none">none</option>
             </select>
           </div>
         </div>

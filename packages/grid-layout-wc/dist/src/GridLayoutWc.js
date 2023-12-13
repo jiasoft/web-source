@@ -400,8 +400,12 @@ export class GridLayoutWc extends LitElement {
     }
     animateGridItem(item, w = 3, h = 2) {
         return new Promise(resolve => {
-            const minusW = (item.w - w) / 5;
-            const minusH = (item.h - h) / 5;
+            let minusW = Math.floor((item.w - w) / 5);
+            let minusH = Math.floor((item.h - h) / 5);
+            if (minusW < 1)
+                minusW = 1;
+            if (minusH < 1)
+                minusH = 1;
             const animate = () => {
                 item.w -= minusW;
                 item.h -= minusH;
@@ -1101,7 +1105,7 @@ export class GridLayoutWc extends LitElement {
     `;
     }
     showDialog() {
-        var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p;
+        var _a, _b, _c, _d, _e;
         if (!this.showDialogGridStyle)
             return '';
         return html `<div class="dialog" open>
@@ -1123,15 +1127,15 @@ export class GridLayoutWc extends LitElement {
               value="${((_b = this.curGridItemSubMenuGridDataUserStyle) === null || _b === void 0 ? void 0 : _b.borderStyle) || ''}"
               @change="${(e) => { this.dialogChangeInput('borderStyle', e); }}">
               <option value=""></option>
-              <option value="solid" ${((_c = this.curGridItemSubMenuGridDataUserStyle) === null || _c === void 0 ? void 0 : _c.borderStyle) === 'solid' ? 'selected' : ''}>solid</option>
-              <option value="dotted" ${((_d = this.curGridItemSubMenuGridDataUserStyle) === null || _d === void 0 ? void 0 : _d.borderStyle) === 'dotted' ? 'selected' : ''}>dotted</option>
-              <option value="double" ${((_e = this.curGridItemSubMenuGridDataUserStyle) === null || _e === void 0 ? void 0 : _e.borderStyle) === 'double' ? 'selected' : ''}>double</option>
-              <option value="dashed" ${((_f = this.curGridItemSubMenuGridDataUserStyle) === null || _f === void 0 ? void 0 : _f.borderStyle) === 'dashed' ? 'selected' : ''}>dashed</option>
-              <option value="hidden" ${((_g = this.curGridItemSubMenuGridDataUserStyle) === null || _g === void 0 ? void 0 : _g.borderStyle) === 'hidden' ? 'selected' : ''}>hidden</option>
-              <option value="inset" ${((_h = this.curGridItemSubMenuGridDataUserStyle) === null || _h === void 0 ? void 0 : _h.borderStyle) === 'inset' ? 'selected' : ''}>inset</option>
-              <option value="outset" ${((_j = this.curGridItemSubMenuGridDataUserStyle) === null || _j === void 0 ? void 0 : _j.borderStyle) === 'outset' ? 'selected' : ''}>outset</option>
-              <option value="ridge" ${((_k = this.curGridItemSubMenuGridDataUserStyle) === null || _k === void 0 ? void 0 : _k.borderStyle) === 'ridge' ? 'selected' : ''}>ridge</option>    
-              <option value="none" ${((_l = this.curGridItemSubMenuGridDataUserStyle) === null || _l === void 0 ? void 0 : _l.borderStyle) === 'none' ? 'selected' : ''}>none</option>
+              <option value="solid">solid</option>
+              <option value="dotted">dotted</option>
+              <option value="double" >double</option>
+              <option value="dashed">dashed</option>
+              <option value="hidden" >hidden</option>
+              <option value="inset" >inset</option>
+              <option value="outset" >outset</option>
+              <option value="ridge" >ridge</option>    
+              <option value="none">none</option>
             </select>
           </div>
         </div>
@@ -1139,7 +1143,7 @@ export class GridLayoutWc extends LitElement {
           <span class="lab">border-color:</span>
           <div class="ctr">
             <input class="ctr-input"  type="color"
-            value="${((_m = this.curGridItemSubMenuGridDataUserStyle) === null || _m === void 0 ? void 0 : _m.borderColor) || ''}" 
+            value="${((_c = this.curGridItemSubMenuGridDataUserStyle) === null || _c === void 0 ? void 0 : _c.borderColor) || ''}" 
             @change="${(e) => { this.dialogChangeInput('borderColor', e); }}" />
           </div>
         </div>
@@ -1147,7 +1151,7 @@ export class GridLayoutWc extends LitElement {
           <span class="lab">border-radius:</span>
           <div class="ctr">
             <input class="ctr-input"  type="number" min="0" max="10"
-            value="${((_o = this.curGridItemSubMenuGridDataUserStyle) === null || _o === void 0 ? void 0 : _o.borderRadius) || ''}" 
+            value="${((_d = this.curGridItemSubMenuGridDataUserStyle) === null || _d === void 0 ? void 0 : _d.borderRadius) || ''}" 
             @change="${(e) => { this.dialogChangeInput('borderRadius', e); }}" />
           </div>
         </div>
@@ -1155,7 +1159,7 @@ export class GridLayoutWc extends LitElement {
           <span class="lab">background-color:</span>
           <div class="ctr">
             <input class="ctr-input" type="color" 
-              value="${((_p = this.curGridItemSubMenuGridDataUserStyle) === null || _p === void 0 ? void 0 : _p.backgroundColor) || ''}" 
+              value="${((_e = this.curGridItemSubMenuGridDataUserStyle) === null || _e === void 0 ? void 0 : _e.backgroundColor) || ''}" 
               @change="${(e) => { this.dialogChangeInput('backgroundColor', e); }}" />
           </div>
         </div>
