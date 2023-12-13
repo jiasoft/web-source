@@ -480,7 +480,7 @@ export class GridLayoutWc extends LitElement {
         if (target === null || target === void 0 ? void 0 : target.closest('.btn-more')) {
             const rect = target.getBoundingClientRect();
             const parentRect = ((_b = (_a = this.shadowRoot) === null || _a === void 0 ? void 0 : _a.firstElementChild) === null || _b === void 0 ? void 0 : _b.getBoundingClientRect()) || { left: 0, top: 0, width: this.stageWidth, height: this.stageHeight };
-            this.curGridItemSubMenuPos.x = rect.left - parentRect.left + rect.width / 2;
+            this.curGridItemSubMenuPos.x = rect.left - parentRect.left + rect.width;
             this.curGridItemSubMenuPos.y = rect.top - parentRect.top + rect.height;
             this.curGridItemSubMenuShow = true;
             this.curGridItemSubMenuGridData = this.getGridItem(event.currentTarget);
@@ -1101,7 +1101,7 @@ export class GridLayoutWc extends LitElement {
     `;
     }
     showDialog() {
-        var _a, _b, _c, _d, _e;
+        var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p;
         if (!this.showDialogGridStyle)
             return '';
         return html `<div class="dialog" open>
@@ -1118,19 +1118,20 @@ export class GridLayoutWc extends LitElement {
         <div class="item">
           <span class="lab">border-style:</span>
           <div class="ctr">
+          
             <select class="ctr-input" 
               value="${((_b = this.curGridItemSubMenuGridDataUserStyle) === null || _b === void 0 ? void 0 : _b.borderStyle) || ''}"
               @change="${(e) => { this.dialogChangeInput('borderStyle', e); }}">
               <option value=""></option>
-              <option value="solid">solid</option>
-              <option value="dotted">dotted</option>
-              <option value="double">double</option>
-              <option value="dashed">dashed</option>
-              <option value="hidden">hidden</option>
-              <option value="inset">inset</option>
-              <option value="outset">outset</option>
-              <option value="ridge">ridge</option>    
-              <option value="none">none</option>
+              <option value="solid" ${((_c = this.curGridItemSubMenuGridDataUserStyle) === null || _c === void 0 ? void 0 : _c.borderStyle) === 'solid' ? 'selected' : ''}>solid</option>
+              <option value="dotted" ${((_d = this.curGridItemSubMenuGridDataUserStyle) === null || _d === void 0 ? void 0 : _d.borderStyle) === 'dotted' ? 'selected' : ''}>dotted</option>
+              <option value="double" ${((_e = this.curGridItemSubMenuGridDataUserStyle) === null || _e === void 0 ? void 0 : _e.borderStyle) === 'double' ? 'selected' : ''}>double</option>
+              <option value="dashed" ${((_f = this.curGridItemSubMenuGridDataUserStyle) === null || _f === void 0 ? void 0 : _f.borderStyle) === 'dashed' ? 'selected' : ''}>dashed</option>
+              <option value="hidden" ${((_g = this.curGridItemSubMenuGridDataUserStyle) === null || _g === void 0 ? void 0 : _g.borderStyle) === 'hidden' ? 'selected' : ''}>hidden</option>
+              <option value="inset" ${((_h = this.curGridItemSubMenuGridDataUserStyle) === null || _h === void 0 ? void 0 : _h.borderStyle) === 'inset' ? 'selected' : ''}>inset</option>
+              <option value="outset" ${((_j = this.curGridItemSubMenuGridDataUserStyle) === null || _j === void 0 ? void 0 : _j.borderStyle) === 'outset' ? 'selected' : ''}>outset</option>
+              <option value="ridge" ${((_k = this.curGridItemSubMenuGridDataUserStyle) === null || _k === void 0 ? void 0 : _k.borderStyle) === 'ridge' ? 'selected' : ''}>ridge</option>    
+              <option value="none" ${((_l = this.curGridItemSubMenuGridDataUserStyle) === null || _l === void 0 ? void 0 : _l.borderStyle) === 'none' ? 'selected' : ''}>none</option>
             </select>
           </div>
         </div>
@@ -1138,7 +1139,7 @@ export class GridLayoutWc extends LitElement {
           <span class="lab">border-color:</span>
           <div class="ctr">
             <input class="ctr-input"  type="color"
-            value="${((_c = this.curGridItemSubMenuGridDataUserStyle) === null || _c === void 0 ? void 0 : _c.borderColor) || ''}" 
+            value="${((_m = this.curGridItemSubMenuGridDataUserStyle) === null || _m === void 0 ? void 0 : _m.borderColor) || ''}" 
             @change="${(e) => { this.dialogChangeInput('borderColor', e); }}" />
           </div>
         </div>
@@ -1146,7 +1147,7 @@ export class GridLayoutWc extends LitElement {
           <span class="lab">border-radius:</span>
           <div class="ctr">
             <input class="ctr-input"  type="number" min="0" max="10"
-            value="${((_d = this.curGridItemSubMenuGridDataUserStyle) === null || _d === void 0 ? void 0 : _d.borderRadius) || ''}" 
+            value="${((_o = this.curGridItemSubMenuGridDataUserStyle) === null || _o === void 0 ? void 0 : _o.borderRadius) || ''}" 
             @change="${(e) => { this.dialogChangeInput('borderRadius', e); }}" />
           </div>
         </div>
@@ -1154,7 +1155,7 @@ export class GridLayoutWc extends LitElement {
           <span class="lab">background-color:</span>
           <div class="ctr">
             <input class="ctr-input" type="color" 
-              value="${((_e = this.curGridItemSubMenuGridDataUserStyle) === null || _e === void 0 ? void 0 : _e.backgroundColor) || ''}" 
+              value="${((_p = this.curGridItemSubMenuGridDataUserStyle) === null || _p === void 0 ? void 0 : _p.backgroundColor) || ''}" 
               @change="${(e) => { this.dialogChangeInput('backgroundColor', e); }}" />
           </div>
         </div>
@@ -1399,7 +1400,7 @@ GridLayoutWc.styles = css `
   font-style:normal;
   font-size:12px;
   color:#333;
-  transform: translateX(-50%);
+  transform: translateX(-100%);
  }
  .box-menu.show{
   display:block;

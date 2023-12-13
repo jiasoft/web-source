@@ -437,7 +437,7 @@ export class GridLayoutWc extends LitElement {
     if (target?.closest('.btn-more')) {
       const rect = target.getBoundingClientRect();
       const parentRect = this.shadowRoot?.firstElementChild?.getBoundingClientRect() || {left:0,top:0,width:this.stageWidth,height:this.stageHeight};
-      this.curGridItemSubMenuPos.x = rect.left - parentRect.left + rect.width / 2;
+      this.curGridItemSubMenuPos.x = rect.left - parentRect.left + rect.width;
       this.curGridItemSubMenuPos.y = rect.top - parentRect.top + rect.height;
       this.curGridItemSubMenuShow = true;
       this.curGridItemSubMenuGridData = this.getGridItem(event.currentTarget);
@@ -1144,19 +1144,20 @@ export class GridLayoutWc extends LitElement {
         <div class="item">
           <span class="lab">border-style:</span>
           <div class="ctr">
+          
             <select class="ctr-input" 
               value="${this.curGridItemSubMenuGridDataUserStyle?.borderStyle||''}"
               @change="${(e:any)=>{this.dialogChangeInput('borderStyle',e)}}">
               <option value=""></option>
-              <option value="solid">solid</option>
-              <option value="dotted">dotted</option>
-              <option value="double">double</option>
-              <option value="dashed">dashed</option>
-              <option value="hidden">hidden</option>
-              <option value="inset">inset</option>
-              <option value="outset">outset</option>
-              <option value="ridge">ridge</option>    
-              <option value="none">none</option>
+              <option value="solid" ${this.curGridItemSubMenuGridDataUserStyle?.borderStyle ==='solid'?'selected':''}>solid</option>
+              <option value="dotted" ${this.curGridItemSubMenuGridDataUserStyle?.borderStyle ==='dotted'?'selected':''}>dotted</option>
+              <option value="double" ${this.curGridItemSubMenuGridDataUserStyle?.borderStyle ==='double'?'selected':''}>double</option>
+              <option value="dashed" ${this.curGridItemSubMenuGridDataUserStyle?.borderStyle ==='dashed'?'selected':''}>dashed</option>
+              <option value="hidden" ${this.curGridItemSubMenuGridDataUserStyle?.borderStyle ==='hidden'?'selected':''}>hidden</option>
+              <option value="inset" ${this.curGridItemSubMenuGridDataUserStyle?.borderStyle ==='inset'?'selected':''}>inset</option>
+              <option value="outset" ${this.curGridItemSubMenuGridDataUserStyle?.borderStyle ==='outset'?'selected':''}>outset</option>
+              <option value="ridge" ${this.curGridItemSubMenuGridDataUserStyle?.borderStyle ==='ridge'?'selected':''}>ridge</option>    
+              <option value="none" ${this.curGridItemSubMenuGridDataUserStyle?.borderStyle ==='none'?'selected':''}>none</option>
             </select>
           </div>
         </div>
@@ -1424,7 +1425,7 @@ export class GridLayoutWc extends LitElement {
   font-style:normal;
   font-size:12px;
   color:#333;
-  transform: translateX(-50%);
+  transform: translateX(-100%);
  }
  .box-menu.show{
   display:block;
