@@ -1,0 +1,12 @@
+{
+  "entries": [
+    "components/chart-config/chart-config.js"
+  ],
+  "compiler": {
+    "name": "@stencil/core",
+    "version": "4.8.1",
+    "typescriptVersion": "5.2.2"
+  },
+  "collections": [],
+  "bundles": []
+}
